@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System.Collections.Generic;
 
 namespace Minesweeper
 {
@@ -14,6 +15,12 @@ namespace Minesweeper
         Texture2D rectTexture,flagTexture,mineTexture,explodeTexture,heartTexture,coinTexture,restartTexture;
 
         MouseState mouseState, prevMouseState;
+
+        Board game;
+
+        List<Button> buttons = new List<Button>();
+
+        SpriteFont spriteFont;
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -31,7 +38,12 @@ namespace Minesweeper
             width = _graphics.PreferredBackBufferWidth;
             height = _graphics.PreferredBackBufferHeight;
 
+
             base.Initialize();
+            Rectangle rectEasy = new Rectangle(width/2 - width/20, height/10-height/40, width/10, height/20);
+            Button btnEasy = new Button(rectTexture,spriteFont,rectEasy,"Easy",Color.Gray,true);
+            buttons.Add(btnEasy);
+
         }
 
         protected override void LoadContent()
@@ -43,6 +55,7 @@ namespace Minesweeper
             rectTexture = Content.Load<Texture2D>("rectangle");
             mineTexture = Content.Load<Texture2D>("mine");
             explodeTexture = Content.Load<Texture2D>("exploded");
+            spriteFont = Content.Load<SpriteFont>("SpriteFont");
         }
 
         protected override void Update(GameTime gameTime)
@@ -54,6 +67,26 @@ namespace Minesweeper
             prevMouseState = mouseState;
             mouseState = Mouse.GetState();
 
+            foreach (Button button in buttons)
+            {
+                if (button.Contain(mouseState))
+                {
+                    if (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed)
+                    {
+                        button.Visible = false;
+
+                    }
+                    else
+                    {
+                        button.Color = Color.DarkGray;
+                    }
+                }
+                else
+                {
+                    button.Color = Color.Gray;
+                }
+            }
+
             base.Update(gameTime);
         }
 
@@ -64,6 +97,13 @@ namespace Minesweeper
             // TODO: Add your drawing code here
             _spriteBatch.Begin();
 
+            foreach(Button button in buttons)
+            {
+                if (button.Visible)
+                {
+                     button.Draw(_spriteBatch);
+                }
+            }
 
             _spriteBatch.End();
             base.Draw(gameTime);
