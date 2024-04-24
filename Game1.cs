@@ -31,18 +31,24 @@ namespace Minesweeper
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            _graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
-            _graphics.PreferredBackBufferHeight = GraphicsDevice.Adapter.CurrentDisplayMode.Height;
-            _graphics.IsFullScreen = true;
+            _graphics.PreferredBackBufferWidth = 800;//GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+            _graphics.PreferredBackBufferHeight = 600;// GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            //_graphics.IsFullScreen = true;
             _graphics.ApplyChanges();
             width = _graphics.PreferredBackBufferWidth;
             height = _graphics.PreferredBackBufferHeight;
 
 
             base.Initialize();
+
             Rectangle rectEasy = new Rectangle(width/2 - width/20, height/10-height/40, width/10, height/20);
             Button btnEasy = new Button(rectTexture,spriteFont,rectEasy,"Easy",Color.Gray,true);
-            buttons.Add(btnEasy);
+            buttons.Add(btnEasy);//0
+
+            Rectangle rectRestart = new Rectangle(width / 2 - width / 3, height / 2 - width / 4, height / 20, height / 20);
+            Button btnRestart = new Button(restartTexture, spriteFont, rectRestart, "", Color.White, false);
+            buttons.Add(btnRestart);//1
+
 
         }
 
@@ -56,6 +62,7 @@ namespace Minesweeper
             mineTexture = Content.Load<Texture2D>("mine");
             explodeTexture = Content.Load<Texture2D>("exploded");
             spriteFont = Content.Load<SpriteFont>("SpriteFont");
+            restartTexture = Content.Load<Texture2D>("restart");
         }
 
         protected override void Update(GameTime gameTime)
@@ -67,25 +74,33 @@ namespace Minesweeper
             prevMouseState = mouseState;
             mouseState = Mouse.GetState();
 
-            foreach (Button button in buttons)
+            if (buttons[0].Contain(mouseState))
             {
-                if (button.Contain(mouseState))
+                if (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed)
                 {
-                    if (mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed)
-                    {
-                        button.Visible = false;
-
-                    }
-                    else
-                    {
-                        button.Color = Color.DarkGray;
-                    }
+                    buttons[0].Visible = false;
+                    Rectangle boardRect = new Rectangle(width / 2 - width / 4, height / 2 - width / 4, width / 2, width / 2);
+                    game = new Board(rectTexture, mineTexture, 9, 9, 10, boardRect, spriteFont);
+                    game.NewBoard();
+                    buttons[1].Visible = true;
                 }
                 else
                 {
-                    button.Color = Color.Gray;
+                    buttons[0].Color = Color.DarkGray;
                 }
             }
+            else
+            {
+                buttons[0].Color = Color.Gray;
+            }
+
+            if (buttons[1].Contain(mouseState)&& mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed)
+            {
+                game.NewBoard();
+            }
+
+            if (game != null)
+                game.Update(mouseState, prevMouseState);
 
             base.Update(gameTime);
         }
@@ -103,6 +118,11 @@ namespace Minesweeper
                 {
                      button.Draw(_spriteBatch);
                 }
+            }
+
+            if (game != null)
+            {
+                game.Draw(_spriteBatch);
             }
 
             _spriteBatch.End();

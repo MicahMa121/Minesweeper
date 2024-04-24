@@ -12,8 +12,9 @@ namespace Minesweeper
         private SpriteFont _font;
         private Vector2 _center;
         private Texture2D _bombTexture;
+        private bool _revealed;
 
-        public Box(Texture2D texture, Texture2D bombtexture, Rectangle position, int value, Color color,  SpriteFont font)
+        public Box(Texture2D texture, Texture2D bombtexture, Rectangle position, int value, Color color,  SpriteFont font, bool revealed)
         {
             _texture = texture;
             _bombTexture = bombtexture;
@@ -23,6 +24,7 @@ namespace Minesweeper
             _font = font;
             _center = new Vector2(_position.X + _position.Width / 2, _position.Y + _position.Height / 2);
             _txtColor = Color.Black;
+            _revealed = revealed;
         }
 
         public int Value
@@ -30,7 +32,11 @@ namespace Minesweeper
             get { return _value; }
             set { _value = value; }
         }
-
+        public bool Reveal
+        {
+            get { return _revealed; }
+            set { _revealed = value; }
+        }
         public void Draw(SpriteBatch spriteBatch)
         {
             spriteBatch.Draw(_texture, _position, _color);
@@ -44,6 +50,10 @@ namespace Minesweeper
                 Vector2 txtPosition = new Vector2(_center.X - _font.MeasureString(txt).X / 2, _center.Y - _font.MeasureString(txt).Y / 2);
                 if (Value != 0)
                     spriteBatch.DrawString(_font, txt, txtPosition, _txtColor);
+            }
+            if (!_revealed)
+            {
+                spriteBatch.Draw(_texture, _position, Color.Gray);
             }
         }
     }
