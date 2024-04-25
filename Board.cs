@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
@@ -20,8 +21,10 @@ namespace Minesweeper
         private Box[,] _board;
         private string _gameState;
         private Vector2 _center;
-
-        public Board(Texture2D texture,Texture2D bombtexture, int width, int height, int numMines, Rectangle board,SpriteFont font)
+        private Texture2D _flagTexture;
+        public int Flags;
+        public SoundEffect bub, explosion;
+        public Board(Texture2D texture,Texture2D bombtexture,Texture2D flagtexture, int width, int height, int numMines, Rectangle board,SpriteFont font)
         {
             _width = width;
             _height = height;
@@ -30,60 +33,71 @@ namespace Minesweeper
             _numMines = numMines;
             _rectTexture = texture;
             _bombTexture = bombtexture;
+            _flagTexture = flagtexture;
             _font = font;
             _board = new Box[width, height];
             _rects = new Rectangle[width, height];
 
+
         }
+        public string GameState
+        {
+            get { return _gameState; }
+            set { _gameState = value; }
+        }
+
+
         public void NewBoard()
         {
+            Flags = 0;
             _gameState = "ready";
             for (int i = 0; i < _width; i++)
             {
                 for (int j = 0; j < _height; j++)
                 {
                     int width = _boardRect.Width / _width;
-                    int height = _boardRect.Height / _height;
-                    Rectangle rect = new Rectangle(_boardRect.X + width * i + 2, _boardRect.Y + height * j + 2, width - 1, height - 1);
+                    Rectangle rect = new Rectangle(_boardRect.X + width * i + 2, _boardRect.Y + width * j + 2, width - 1, width - 1);
                     _rects[i, j] = rect;
                     int value = 0;
-                    Box box = new Box(_rectTexture, _bombTexture, rect, value, Color.LightGray, _font, false);
+                    Box box = new Box(_rectTexture, _bombTexture, _flagTexture, rect, value, Color.LightGray, _font, false);
                     _board[i, j] = box;
                 }
             }
         }
         private void GameStart(int x, int y)
         {
-            List<int> bombs = new List<int> ();
+            List<int> mines = new List<int> ();
             List<int> safezones = new List<int>();
             for (int k = 0; k < 3; k++)
             {
                 for (int l = 0; l < 3; l++)
                 {
-                    int safezone = (x-1+k) * _width + (y-1+l);
+                    int safezone = (x-1+k) * _height + (y-1+l);
                     safezones.Add(safezone);
                 }
             }
-            for (int i = 0; i < _numMines; i++)
+            while (mines.Count < _numMines)
             {
-                int bomb = gen.Next(_width * _height);
+                int mine = gen.Next(_width * _height);
                 bool safe = true;
                 foreach (int safezone in safezones)
                 {
-                    if (bomb == safezone)
+                    if (mine == safezone)
                     {
                         safe = false;
                     }
                 }
-                if (!safe)
+                foreach (int used in mines)
                 {
-                    i--;
+                    if (mine == used)
+                    {
+                        safe = false;
+                    }
                 }
-                else
+                if (safe)
                 {
-                    bombs.Add(bomb);
+                    mines.Add(mine);
                 }
-
             }
             int count = 0;
             for (int i = 0; i < _width; i++)
@@ -91,11 +105,10 @@ namespace Minesweeper
                 for (int j = 0;  j < _height; j++)
                 {
                     int width = _boardRect.Width / _width;
-                    int height = _boardRect.Height / _height;
-                    Rectangle rect = new Rectangle(_boardRect.X + width * i + 2, _boardRect.Y + height * j + 2, width - 1, height - 1);
+                    Rectangle rect = new Rectangle(_boardRect.X + width * i + 2, _boardRect.Y + width * j + 2, width - 1, width - 1);
                     _rects[i,j] = rect;
                     int value;
-                    if (bombs.Contains(count))
+                    if (mines.Contains(count))
                     {
                         value = 9;
                     }
@@ -103,7 +116,7 @@ namespace Minesweeper
                     {
                         value = 0;
                     }
-                    Box box = new Box(_rectTexture, _bombTexture, rect, value, Color.LightGray, _font, false) ;
+                    Box box = new Box(_rectTexture, _bombTexture,_flagTexture, rect, value, Color.LightGray, _font, false) ;
                     _board[i,j] = box;
                     count++;
                 }
@@ -151,6 +164,18 @@ namespace Minesweeper
                 Vector2 txtPosition = new Vector2(_center.X - _font.MeasureString("BOOM!").X / 2, _center.Y - _font.MeasureString("BOOM!").Y / 2);
                 spriteBatch.DrawString(_font, "BOOM!", txtPosition, Color.Red);
             }
+            if (_gameState == "won")
+            {
+                Vector2 txtPosition = new Vector2(_center.X - _font.MeasureString("You Won!").X / 2, _center.Y - _font.MeasureString("You Won!").Y / 2);
+                spriteBatch.DrawString(_font, "You Won!", txtPosition, Color.Green);
+                for (int i = 0; i < _width; i++)
+                {
+                    for (int j = 0; j < _height; j++)
+                    {
+                        _board[i, j].Reveal = true ;
+                    }
+                }
+            }
         }
         public void Update(MouseState mousestate, MouseState prevmousestate)
         {
@@ -167,28 +192,93 @@ namespace Minesweeper
                 return;
             }
 
+            int winScore = 0;
+            for (int i = 0; i < _width; i++)
+            {
+                for (int j = 0; j < _height; j++)
+                {
+                    if (_board[i,j].Value != 9 && _board[i,j].Reveal)
+                    {
+                        winScore++;
+                    }
+                }
+            }
+            if(winScore == (_width*_height - _numMines))
+            {
+                _gameState = "won";
+                return;
+            }
 
             for (int i =0; i < _width; i++)
             {
                 for (int j = 0; j < _height; j++)
                 {
-                    if (_rects[i, j].Contains(_mouseState.Position) && _mouseState.LeftButton == ButtonState.Released && _prevMouseState.LeftButton == ButtonState.Pressed)
+                    if (!_board[i,j].Flagged&&_rects[i, j].Contains(_mouseState.Position) && _mouseState.LeftButton == ButtonState.Released && _prevMouseState.LeftButton == ButtonState.Pressed)
                     {
                         if (_gameState == "ready")
                         {
                             _gameState = "play";
                             GameStart(i,j);
-                            return;
                         }
                         if (_board[i,j].Value == 9) 
                         {
                             _gameState = "lost";
+                            explosion.Play();
+                            _board[i, j].Reveal = true;
+                            return;
                         }
                         if (_board[i,j].Value == 0)
                         {
-                            
+                            for (int k = 0; k < _width; k++)
+                            {
+                                for (int l = 0; l < _height; l++)
+                                {
+                                    _board[k, l].Checked = false ;
+                                }
+                            }
+                            CheckSurrounding(i,j);
                         }
                         _board[i,j].Reveal = true;
+                        bub.Play();
+                    }
+                    if (_gameState == "play"&&_rects[i, j].Contains(_mouseState.Position) && _mouseState.RightButton == ButtonState.Released && _prevMouseState.RightButton == ButtonState.Pressed)
+                    {
+                        if (_board[i,j].Flagged)
+                        {
+                            _board[i, j].Flagged = false;
+                            Flags--;
+                        }
+                        else if (!_board[i,j].Flagged)
+                        {
+                            _board[i, j].Flagged = true;
+                            Flags++;
+                        }
+                    }
+                }
+            }
+        }
+        private void CheckSurrounding(int i, int j)
+        {
+            //_board[i, j].Reveal = true;
+            _board[i, j].Checked = true;
+            for (int k = 0; k < 3; k++)
+            {
+                for (int l = 0; l < 3; l++)
+                {
+                    if (i - 1 + k >= 0 && i - 1 + k < _width && j - 1 + l >= 0 && j - 1 + l < _height)
+                    {
+                        if (i - 1 + k >= 0 && i - 1 + k < _width && j - 1 + l >= 0 && j - 1 + l < _height)
+                        {
+                            if (!(k == 1 && l == 1) && _board[i - 1 + k, j - 1 + l].Value == 0 && _board[i - 1 + k, j - 1 + l].Checked == false)
+                            {
+                                _board[i - 1 + k, j - 1 + l].Reveal = true;
+                                CheckSurrounding(i - 1 + k, j - 1 + l);
+                            }
+                            else
+                            {
+                                _board[i - 1 + k, j - 1 + l].Reveal = true;
+                            }
+                        }
                     }
                 }
             }
