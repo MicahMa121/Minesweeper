@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
-using static System.Reflection.Metadata.BlobBuilder;
+using System.IO;
 
 namespace Minesweeper
 {
@@ -23,7 +23,7 @@ namespace Minesweeper
         private Vector2 _center;
         private Texture2D _flagTexture;
         public int Flags;
-        public SoundEffect bub, explosion;
+        public SoundEffectInstance bub, explosion;
         public Board(Texture2D texture,Texture2D bombtexture,Texture2D flagtexture, int width, int height, int numMines, Rectangle board,SpriteFont font)
         {
             _width = width;
@@ -206,6 +206,19 @@ namespace Minesweeper
             if(winScore == (_width*_height - _numMines))
             {
                 _gameState = "won";
+                string[] arrLine = File.ReadAllLines(@"data.txt");
+                if (_width == 9)
+                {
+                    arrLine[0] = Convert.ToString(1 + Convert.ToInt16(arrLine[0]));
+                }
+                else if (_width == 16)
+                {
+                    arrLine[1] = Convert.ToString(1 + Convert.ToInt16(arrLine[0]));
+                }
+                else if (_width == 30)
+                {
+                    arrLine[2] = Convert.ToString(1 + Convert.ToInt16(arrLine[0]));
+                }
                 return;
             }
 
@@ -215,6 +228,7 @@ namespace Minesweeper
                 {
                     if (!_board[i,j].Flagged&&_rects[i, j].Contains(_mouseState.Position) && _mouseState.LeftButton == ButtonState.Released && _prevMouseState.LeftButton == ButtonState.Pressed)
                     {
+                        explosion.Stop();
                         if (_gameState == "ready")
                         {
                             _gameState = "play";
