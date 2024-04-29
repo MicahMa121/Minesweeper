@@ -241,7 +241,7 @@ namespace Minesweeper
                             _board[i, j].Reveal = true;
                             return;
                         }
-                        if (_board[i,j].Value == 0)
+                        else if (_board[i,j].Value == 0)
                         {
                             for (int k = 0; k < _width; k++)
                             {
@@ -252,28 +252,51 @@ namespace Minesweeper
                             }
                             CheckSurrounding(i,j);
                         }
+                        else if (_board[i,j].Reveal && _board[i, j].Value != 0)
+                        {
+                            bool canquickcheck = true;
+                            for (int k = 0; k < 3; k++)
+                            {
+                                for (int l = 0; l < 3; l++)
+                                {
+                                    if (i - 1 + k >= 0 && i - 1 + k < _width && j - 1 + l >= 0 && j - 1 + l < _height)
+                                    {
+                                        if (i - 1 + k >= 0 && i - 1 + k < _width && j - 1 + l >= 0 && j - 1 + l < _height)
+                                        {
+                                            if (_board[i - 1 + k, j - 1 + l].Value == 9 && _board[i - 1 + k, j - 1 + l].Flagged == false)
+                                            {
+                                                canquickcheck = false;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if (canquickcheck)
+                            {
+                                QuickCheck(i,j);
+                            }
+                        }
                         _board[i,j].Reveal = true;
                         bub.Play();
-                    }
-                    if (_gameState == "play"&&_rects[i, j].Contains(_mouseState.Position) && _mouseState.RightButton == ButtonState.Released && _prevMouseState.RightButton == ButtonState.Pressed)
-                    {
-                        if (_board[i,j].Flagged)
-                        {
-                            _board[i, j].Flagged = false;
-                            Flags--;
                         }
-                        else if (!_board[i,j].Flagged)
+                        if (_gameState == "play"&&_rects[i, j].Contains(_mouseState.Position) && _mouseState.RightButton == ButtonState.Released && _prevMouseState.RightButton == ButtonState.Pressed)
                         {
-                            _board[i, j].Flagged = true;
-                            Flags++;
-                        }
+                            if (_board[i,j].Flagged)
+                            {
+                                _board[i, j].Flagged = false;
+                                Flags--;
+                            }
+                            else if (!_board[i,j].Flagged)
+                            {
+                                _board[i, j].Flagged = true;
+                                Flags++;
+                            }
                     }
                 }
             }
         }
         private void CheckSurrounding(int i, int j)
         {
-            //_board[i, j].Reveal = true;
             _board[i, j].Checked = true;
             for (int k = 0; k < 3; k++)
             {
@@ -289,6 +312,31 @@ namespace Minesweeper
                                 CheckSurrounding(i - 1 + k, j - 1 + l);
                             }
                             else
+                            {
+                                _board[i - 1 + k, j - 1 + l].Reveal = true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        private void QuickCheck(int i, int j)
+        {
+            _board[i, j].Checked = true;
+            for (int k = 0; k < 3; k++)
+            {
+                for (int l = 0; l < 3; l++)
+                {
+                    if (i - 1 + k >= 0 && i - 1 + k < _width && j - 1 + l >= 0 && j - 1 + l < _height)
+                    {
+                        if (i - 1 + k >= 0 && i - 1 + k < _width && j - 1 + l >= 0 && j - 1 + l < _height)
+                        {
+                            if (!(k == 1 && l == 1) && _board[i - 1 + k, j - 1 + l].Value == 0 && _board[i - 1 + k, j - 1 + l].Checked == false)
+                            {
+                                _board[i - 1 + k, j - 1 + l].Reveal = true;
+                                QuickCheck(i - 1 + k, j - 1 + l);
+                            }
+                            else if (!(k == 1 && l == 1) && _board[i - 1 + k, j - 1 + l].Value != 9 && _board[i - 1 + k, j - 1 + l].Checked == false)
                             {
                                 _board[i - 1 + k, j - 1 + l].Reveal = true;
                             }

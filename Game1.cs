@@ -126,7 +126,7 @@ namespace Minesweeper
             // TODO: Add your update logic here
             prevMouseState = mouseState;
             mouseState = Mouse.GetState();
-
+            
             time = (float)gameTime.TotalGameTime.TotalSeconds;
 
             if (buttons[0].Contain(mouseState) && buttons[0].Visible)
