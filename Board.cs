@@ -286,7 +286,7 @@ namespace Minesweeper
                                 _board[i, j].Flagged = false;
                                 Flags--;
                             }
-                            else if (!_board[i,j].Flagged)
+                            else if (!_board[i, j].Flagged && !_board[i, j].Reveal)
                             {
                                 _board[i, j].Flagged = true;
                                 Flags++;
