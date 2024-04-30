@@ -32,6 +32,7 @@ namespace Minesweeper
         float time,gametime;
 
         string mode,gamestate;
+
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -42,9 +43,9 @@ namespace Minesweeper
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            _graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
-            _graphics.PreferredBackBufferHeight =  GraphicsDevice.Adapter.CurrentDisplayMode.Height;
-            _graphics.IsFullScreen = true;
+            _graphics.PreferredBackBufferWidth = 1200;//GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+            _graphics.PreferredBackBufferHeight = 900;//GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            //_graphics.IsFullScreen = true;
             _graphics.ApplyChanges();
             width = _graphics.PreferredBackBufferWidth;
             height = _graphics.PreferredBackBufferHeight;
@@ -96,6 +97,13 @@ namespace Minesweeper
             Button btnData = new Button(rectTexture, spriteFont, rectData, "Win a Game To Check Your Result!", Color.LightGray, false);
             buttons.Add(btnData);//10
 
+            Rectangle rectHelp = new Rectangle(width / 2 - width / 20, height * 3 / 4 , width / 10, height / 20);
+            Button btnHelp = new Button(rectTexture, spriteFont, rectHelp, "Help", Color.Gray, true);
+            buttons.Add(btnHelp);//11
+
+            Rectangle rectInfo = new Rectangle(width / 2 - width *3/ 8, height / 2 - height/6, width * 3 / 4, height / 3);
+            Button btnInfo = new Button(rectTexture, spriteFont, rectInfo, "Right click an unrevealed box to reveal it!\nLeft click a box to flag it!\nRight click a number to quickly reveal surrounding empty space.\nDo not reveal the mines!\nEnjoy!", Color.LightGray, false);
+            buttons.Add(btnInfo);//12
             bubInstance = bubSound.CreateInstance();
             explosionInstance = explosionSound.CreateInstance();
         }
@@ -139,7 +147,8 @@ namespace Minesweeper
                     buttons[2].Visible = false;
                     buttons[3].Visible = false;
                     buttons[8].Visible = false;
-                    Rectangle boardRect = new Rectangle(width / 2 - width / 4, height / 2 - width / 4, width / 2+2, width / 2+2);
+                    buttons[11].Visible = false;
+                    Rectangle boardRect = new Rectangle(width / 2 - width / 4, height / 2 - width / 4, width / 2, width / 2);
                     game = new Board(rectTexture, mineTexture,flagTexture, 9, 9, 10, boardRect, spriteFont);
                     game.bub = bubInstance;
                     game.explosion = explosionInstance;
@@ -151,6 +160,7 @@ namespace Minesweeper
                     buttons[7].Visible = true;
                     buttons[9].Visible = false;
                     buttons[10].Visible = false;
+                    buttons[12].Visible = false;
                     numMines = 10;
                 }
                 else
@@ -179,7 +189,8 @@ namespace Minesweeper
                     buttons[0].Visible = false;
                     buttons[3].Visible = false;
                     buttons[8].Visible = false;
-                    Rectangle boardRect = new Rectangle(width / 4 , height / 2 - width / 4, width / 2+2, width / 2+2);
+                    buttons[11].Visible = false;
+                    Rectangle boardRect = new Rectangle(width / 4 , height / 2 - width / 4, width / 2, width / 2);
                     game = new Board(rectTexture, mineTexture, flagTexture, 16, 16,40, boardRect, spriteFont);
                     game.bub = bubInstance;
                     game.explosion = explosionInstance;
@@ -191,6 +202,7 @@ namespace Minesweeper
                     buttons[7].Visible = true;
                     buttons[9].Visible = false;
                     buttons[10].Visible = false;
+                    buttons[12].Visible = false;
                     numMines = 40;
                 }
                 else
@@ -213,7 +225,8 @@ namespace Minesweeper
                     buttons[0].Visible = false;
                     buttons[3].Visible = false;
                     buttons[8].Visible = false;
-                    Rectangle boardRect = new Rectangle(width / 2- (width / 2 + 2) / 16 * 15, height / 2 - width / 4, (width / 2 + 2)/16*30, width / 2 + 2);
+                    buttons[11].Visible = false;
+                    Rectangle boardRect = new Rectangle(width / 2- (width / 2) / 16 * 15, height / 2 - width / 4, (width / 2 )/16*30+6, width / 2 );
                     game = new Board(rectTexture, mineTexture, flagTexture,30, 16, 99, boardRect, spriteFont);
                     game.bub = bubInstance;
                     game.explosion = explosionInstance;
@@ -225,6 +238,7 @@ namespace Minesweeper
                     buttons[7].Visible = true;
                     buttons[9].Visible = false;
                     buttons[10].Visible = false;
+                    buttons[12].Visible = false;
                     numMines = 99;
                 }
                 else
@@ -244,6 +258,7 @@ namespace Minesweeper
                 buttons[2].Visible = true;
                 buttons[3].Visible = true;
                 buttons[8].Visible = true;
+                buttons[11].Visible = true;
                 buttons[1].Visible = false;
                 buttons[4].Visible = false;
                 buttons[5].Visible = false;
@@ -266,10 +281,23 @@ namespace Minesweeper
                 else
                 {
                     buttons[10].Visible = true;
+                    buttons[12].Visible = false;
                 }
             }
 
 
+            if (buttons[11].Contain(mouseState) && buttons[11].Visible && mouseState.LeftButton == ButtonState.Released && prevMouseState.LeftButton == ButtonState.Pressed)
+            {
+                if (buttons[12].Visible)
+                {
+                    buttons[12].Visible = false;
+                }
+                else
+                {
+                    buttons[12].Visible = true;
+                    buttons[10].Visible = false;
+                }
+            }
             if (game != null)
             {
                 game.Update(mouseState, prevMouseState);

@@ -56,7 +56,7 @@ namespace Minesweeper
                 for (int j = 0; j < _height; j++)
                 {
                     int width = _boardRect.Width / _width;
-                    Rectangle rect = new Rectangle(_boardRect.X + width * i + 2, _boardRect.Y + width * j + 2, width - 1, width - 1);
+                    Rectangle rect = new Rectangle(_boardRect.X + width * i + 4, _boardRect.Y + width * j + 4, width - 1, width - 1);
                     _rects[i, j] = rect;
                     int value = 0;
                     Box box = new Box(_rectTexture, _bombTexture, _flagTexture, rect, value, Color.LightGray, _font, false);
@@ -105,7 +105,7 @@ namespace Minesweeper
                 for (int j = 0;  j < _height; j++)
                 {
                     int width = _boardRect.Width / _width;
-                    Rectangle rect = new Rectangle(_boardRect.X + width * i + 2, _boardRect.Y + width * j + 2, width - 1, width - 1);
+                    Rectangle rect = new Rectangle(_boardRect.X + width * i + 4, _boardRect.Y + width * j + 4, width - 1, width - 1);
                     _rects[i,j] = rect;
                     int value;
                     if (mines.Contains(count))
@@ -263,7 +263,7 @@ namespace Minesweeper
                                     {
                                         if (i - 1 + k >= 0 && i - 1 + k < _width && j - 1 + l >= 0 && j - 1 + l < _height)
                                         {
-                                            if (_board[i - 1 + k, j - 1 + l].Value == 9 && _board[i - 1 + k, j - 1 + l].Flagged == false)
+                                            if ((_board[i - 1 + k, j - 1 + l].Value == 9 && _board[i - 1 + k, j - 1 + l].Flagged == false)||(_board[i - 1 + k, j - 1 + l].Flagged&& _board[i - 1 + k, j - 1 + l].Value != 9))
                                             {
                                                 canquickcheck = false;
                                             }
