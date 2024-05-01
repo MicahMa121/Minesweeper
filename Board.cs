@@ -206,19 +206,6 @@ namespace Minesweeper
             if(winScore == (_width*_height - _numMines))
             {
                 _gameState = "won";
-                string[] arrLine = File.ReadAllLines(@"data.txt");
-                if (_width == 9)
-                {
-                    arrLine[0] = Convert.ToString(1 + Convert.ToInt16(arrLine[0]));
-                }
-                else if (_width == 16)
-                {
-                    arrLine[1] = Convert.ToString(1 + Convert.ToInt16(arrLine[0]));
-                }
-                else if (_width == 30)
-                {
-                    arrLine[2] = Convert.ToString(1 + Convert.ToInt16(arrLine[0]));
-                }
                 return;
             }
 

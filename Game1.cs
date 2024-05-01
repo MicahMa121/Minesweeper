@@ -317,31 +317,7 @@ namespace Minesweeper
                 }
                 if (gamestate != "won"&& game.GameState == "won")
                 {
-                    if (File.Exists(@"data.txt"))
-                    {
-                        string[] arrLine = File.ReadAllLines(@"data.txt");
-                        if (mode == "easy")
-                        {
-                            if (Convert.ToDouble(arrLine[3]) > Convert.ToDouble(buttons[7].Text))
-                                arrLine[3] = buttons[7].Text;
-                            arrLine[0] = Convert.ToString(Convert.ToInt16(arrLine[0]) + 1);
-                        }
-                        else if (mode == "med")
-                        {
-                            if (Convert.ToDouble(arrLine[4]) > Convert.ToDouble(buttons[7].Text))
-                                arrLine[4] = buttons[7].Text;
-                            arrLine[1] = Convert.ToString(Convert.ToInt16(arrLine[1]) + 1);
-                        }
-                        else if (mode == "hard")
-                        {
-                            if (Convert.ToDouble(arrLine[5]) > Convert.ToDouble(buttons[7].Text))
-                                arrLine[5] = buttons[7].Text;
-                            arrLine[2] = Convert.ToString(Convert.ToInt16(arrLine[2]) + 1);
-                        }
-                        File.WriteAllLines(@"data.txt", arrLine);
-                        buttons[10].Text = "Easy Mode Completed: " + arrLine[0] + "\nMedium Mode Completed: " + arrLine[1] + "\nHard Mode Completed: " + arrLine[2] + "\nBest Record(Easy): " + arrLine[3] + "\nBest Record(Medium): " + arrLine[4] + "\nBest Record(Hard): " + arrLine[5];
-                    }
-                    else
+                    if (!File.Exists(@"data.txt"))
                     {
                         StreamWriter writer = File.CreateText(@"data.txt");
                         for (int i = 0; i < 6; i++)
@@ -349,7 +325,29 @@ namespace Minesweeper
                             writer.WriteLine("0");
                         }
                         writer.Close();
+                        
                     }
+                    string[] arrLine = File.ReadAllLines(@"data.txt");
+                    if (mode == "easy")
+                    {
+                        if (Convert.ToDouble(arrLine[3]) > Convert.ToDouble(buttons[7].Text) || Convert.ToDouble(arrLine[3]) == 0)
+                            arrLine[3] = buttons[7].Text;
+                        arrLine[0] = Convert.ToString(Convert.ToInt16(arrLine[0]) + 1);
+                    }
+                    else if (mode == "med")
+                    {
+                        if (Convert.ToDouble(arrLine[4]) > Convert.ToDouble(buttons[7].Text) || Convert.ToDouble(arrLine[4]) == 0)
+                            arrLine[4] = buttons[7].Text;
+                        arrLine[1] = Convert.ToString(Convert.ToInt16(arrLine[1]) + 1);
+                    }
+                    else if (mode == "hard")
+                    {
+                        if (Convert.ToDouble(arrLine[5]) > Convert.ToDouble(buttons[7].Text) || Convert.ToDouble(arrLine[5]) == 0)
+                            arrLine[5] = buttons[7].Text;
+                        arrLine[2] = Convert.ToString(Convert.ToInt16(arrLine[2]) + 1);
+                    }
+                    File.WriteAllLines(@"data.txt", arrLine);
+                    buttons[10].Text = "Easy Mode Completed: " + arrLine[0] + "\nMedium Mode Completed: " + arrLine[1] + "\nHard Mode Completed: " + arrLine[2] + "\nBest Record(Easy): " + arrLine[3] + "\nBest Record(Medium): " + arrLine[4] + "\nBest Record(Hard): " + arrLine[5];
                 }
                 gamestate = game.GameState;
                 flags = game.Flags;
